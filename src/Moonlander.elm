@@ -1,4 +1,4 @@
-module Moonlander exposing (..)
+module Moonlander exposing (Model, Msg(..), appTitle, friction, gravity, handleKeyDown, initialModel, landerSvg, landerWidth, main, rotationalThrust, subscriptions, thrust, update, view)
 
 import Browser
 import Browser.Events
@@ -6,6 +6,7 @@ import Color
 import Html exposing (Html)
 import Json.Decode as Json
 import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
+import Length
 import TypedSvg exposing (polygon, svg)
 import TypedSvg.Attributes exposing (fill, points, stroke, strokeWidth, viewBox)
 import TypedSvg.Core exposing (Svg)
@@ -30,6 +31,18 @@ rotationalThrust =
 
 friction =
     0
+
+
+landerWidth =
+    Length.meters 10
+
+
+landerAnchorHeight =
+    Length.meters 2
+
+
+landerAnchorToTopLength =
+    Length.meters 10
 
 
 type alias Model =
@@ -107,33 +120,35 @@ handleKeyDown event model =
 view model =
     { title = appTitle
     , body =
-        [ svg [ viewBox 0 0 800 600 ] [ myCircle model.x model.y model.o 20 ]
+        [ svg [ viewBox 0 0 800 600 ] [ landerSvg model.x model.y model.o 20 ]
         ]
     }
 
 
-myCircle x y o r =
+toPixels : Length.Length -> Float
+toPixels l =
+    2 * Length.inMeters l
+
+
+landerSvg x y o r =
     let
-        x0 =
-            x + r * cos o
+        halfLanderWidthPixels =
+            toPixels landerWidth / 2
 
-        y0 =
-            -y + r * sin o
+        minX =
+            x - halfLanderWidthPixels
 
-        x1 =
-            x + r * cos (o + 3)
+        maxX =
+            x + halfLanderWidthPixels
 
-        y1 =
-            -y + r * sin (o + 3)
+        minY =
+            y - toPixels landerAnchorHeight
 
-        x2 =
-            x + r * cos (o - 3)
-
-        y2 =
-            -y + r * sin (o - 3)
+        maxY =
+            y + toPixels landerAnchorToTopLength
     in
     polygon
-        [ points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
+        [ points [ ( minX, minY ), ( maxX, minY ), ( x, maxY ) ]
         , fill <| Paint Color.blue
         , strokeWidth (px 2)
         , stroke <| Paint <| Color.rgba 0.8 0 0 0.5
