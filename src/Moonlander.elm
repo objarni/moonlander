@@ -120,7 +120,9 @@ handleKeyDown event model =
 view model =
     { title = appTitle
     , body =
-        [ svg [ viewBox 0 0 800 600 ] [ landerSvg model.x model.y model.o 20 ]
+        [ Html.text (String.fromFloat model.x)
+        , Html.text (String.fromFloat model.y)
+        , svg [ viewBox 0 0 800 600 ] [ landerSvg model.x model.y model.o 20 ]
         ]
     }
 
