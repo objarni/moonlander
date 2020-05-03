@@ -1,10 +1,10 @@
-module Moonlander exposing (main)
+module Main exposing (main)
 
 import Browser
 import Color
 import Html exposing (Html, button, div, text)
 import Html.Events exposing (onClick)
-import Length exposing (inMeters, meters)
+import Length exposing (meters)
 import Pixels exposing (inPixels, pixels)
 import Quantity exposing (at, divideBy, minus, multiplyBy, per, plus)
 import TypedSvg exposing (circle, polyline, svg)
@@ -31,6 +31,12 @@ worldHeight =
 
 pixelsPerMeter =
     screenWidth |> per worldWidth
+
+
+worldToScreen wx wy =
+    ( wx |> plus (worldWidth |> divideBy 2) |> at pixelsPerMeter |> inPixels
+    , worldHeight |> minus wy |> at pixelsPerMeter |> inPixels
+    )
 
 
 type alias Model =
@@ -99,11 +105,7 @@ ship wx wy =
 --polyline [ fill FillNone, stroke Color.black, points [ ( 20, 100 ), ( 40, 60 ), ( 70, 80 ), ( 100, 20 ) ] ] []
 
 
-dot wx wy =
-    let
-        ( x, y ) =
-            worldToScreen wx wy
-    in
+dot x y =
     circle
         [ cx (px x)
         , cy (px y)
@@ -113,39 +115,17 @@ dot wx wy =
         []
 
 
-worldToScreen wx wy =
-    ( wx |> plus (worldWidth |> divideBy 2) |> at pixelsPerMeter |> inPixels
-    , worldHeight |> minus wy |> at pixelsPerMeter |> inPixels
-    )
-
-
-left =
-    meters 0 |> minus worldWidth |> divideBy 2
-
-
-right =
-    meters 0 |> plus worldWidth |> divideBy 2
-
-
-top =
-    worldHeight
-
-
-bottom =
-    meters 0
-
-
 topLeft =
-    dot left top
+    dot 0 0
 
 
 topRight =
-    dot right top
+    dot 800 0
 
 
 bottomRight =
-    dot right bottom
+    dot 800 400
 
 
 bottomLeft =
-    dot left bottom
+    dot 0 400
