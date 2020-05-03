@@ -3,11 +3,13 @@ module Moonlander exposing (main)
 import Browser
 import Color
 import Html exposing (Html, button, div, text)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Length exposing (inMeters, meters)
+import Palette exposing (shipColor, spaceColor)
 import Pixels exposing (inPixels, pixels)
 import Quantity exposing (at, divideBy, minus, multiplyBy, per, plus)
-import TypedSvg exposing (circle, polyline, svg)
+import TypedSvg exposing (circle, g, polyline, svg)
 import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, viewBox)
 import TypedSvg.Core exposing (Svg)
 import TypedSvg.Types exposing (Paint(..), px)
@@ -57,7 +59,14 @@ update msg model =
 
 
 view model =
-    div []
+    div
+        [ style "background-color"
+            (Color.toCssString spaceColor)
+        , style "width" "75vw"
+        , style "margin" "auto"
+        , style "border-style" "dashed"
+        , style "border-width" "5"
+        ]
         [ svg [ viewBox 0 0 (inPixels screenWidth) (inPixels screenHeight) ]
             [ topLeft
             , topRight
@@ -78,25 +87,33 @@ main =
 
 ship wx wy =
     let
+        bottom2anchor =
+            meters 2
+
+        top2anchor =
+            meters 8
+
+        shipHalfWidth =
+            meters 5
+
         ( x0, y0 ) =
-            worldToScreen wx (wy |> plus (meters 5))
+            worldToScreen wx (wy |> plus top2anchor)
 
         ( x1, y1 ) =
-            worldToScreen (wx |> plus (meters 5)) (wy |> minus (meters 5))
+            worldToScreen (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor)
 
         ( x2, y2 ) =
-            worldToScreen (wx |> minus (meters 5)) (wy |> minus (meters 5))
+            worldToScreen (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor)
     in
-    polyline
-        [ noFill
-        , stroke <| Paint Color.black
-        , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
+    g []
+        [ polyline
+            [ noFill
+            , stroke <| Paint shipColor
+            , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
+            ]
+            []
+        , dot wx wy
         ]
-        []
-
-
-
---polyline [ fill FillNone, stroke Color.black, points [ ( 20, 100 ), ( 40, 60 ), ( 70, 80 ), ( 100, 20 ) ] ] []
 
 
 dot wx wy =
@@ -108,7 +125,7 @@ dot wx wy =
         [ cx (px x)
         , cy (px y)
         , r (px 5)
-        , fill <| Paint Color.black
+        , fill <| Paint shipColor
         ]
         []
 
