@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 module Moonlander exposing (Model, Msg(..), appTitle, friction, gravity, handleKeyDown, initialModel, landerSvg, landerWidth, main, rotationalThrust, subscriptions, thrust, update, view)
+=======
+module Moonlander exposing (Model, Msg(..), appTitle, friction, gravity, handleKeyDown, initialModel, main, oldShip, rotationalThrust, subscriptions, thrust, update, view)
+>>>>>>> 8bf551bb68daa0b1d0a07311d52939a04310097c
 
 import Browser
 import Browser.Events
@@ -8,9 +12,17 @@ import Json.Decode as Json
 import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
 import Length
 import TypedSvg exposing (polygon, svg)
-import TypedSvg.Attributes exposing (fill, points, stroke, strokeWidth, viewBox)
+import TypedSvg.Attributes exposing (fill, points, stroke, strokeWidth, transform, viewBox)
 import TypedSvg.Core exposing (Svg)
-import TypedSvg.Types exposing (Paint(..), px)
+import TypedSvg.Types exposing (..)
+
+
+gameWidth =
+    800
+
+
+gameHeight =
+    600
 
 
 appTitle =
@@ -120,16 +132,68 @@ handleKeyDown event model =
 view model =
     { title = appTitle
     , body =
+<<<<<<< HEAD
         [ Html.text (String.fromFloat model.x)
         , Html.text (String.fromFloat model.y)
         , svg [ viewBox 0 0 800 600 ] [ landerSvg model.x model.y model.o 20 ]
+=======
+        [ svg [ viewBox 0 0 gameWidth gameHeight ]
+            [ oldShip model.x model.y model.o 20
+            , ship 50 50 0
+            ]
+>>>>>>> 8bf551bb68daa0b1d0a07311d52939a04310097c
         ]
     }
 
 
+<<<<<<< HEAD
 toPixels : Length.Length -> Float
 toPixels l =
     2 * Length.inMeters l
+=======
+landerH =
+    Length.meters 5
+
+
+landerW =
+    Length.meters 10
+
+
+anchorY =
+    Length.meters 2
+
+
+ship x y r =
+    let
+        xMin =
+            -(Length.inMeters landerW) / 2.0
+
+        xMax =
+            Length.inMeters landerW / 2.0
+
+        yMax =
+            Length.inMeters landerH - Length.inMeters anchorY
+
+        yMin =
+            -(Length.inMeters anchorY)
+    in
+    polygon
+        --[ points [ ( xMin, yMin ), ( x, yMax ), ( xMax, yMin ) ]
+        [ points [ ( 0, 0 ), ( gameWidth, gameHeight ) ]
+        , transform
+            [ Translate 0 gameHeight, Scale 1 -1 ]
+        , fill <| Paint Color.black
+        , strokeWidth (px 1)
+        , stroke <| Paint <| Color.gray
+        ]
+        []
+
+
+oldShip x y o r =
+    let
+        x0 =
+            x + r * cos o
+>>>>>>> 8bf551bb68daa0b1d0a07311d52939a04310097c
 
 
 landerSvg x y o r =
