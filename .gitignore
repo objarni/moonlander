@@ -4,3 +4,4 @@ elm-stuff
 repl-temp-*
 index.html
 src/index.html
+node_modules/
