@@ -6,8 +6,10 @@ import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Length exposing (inMeters, meters)
-import Palette exposing (shipColor, spaceColor)
+import List
+import Palette exposing (..)
 import Pixels exposing (inPixels, pixels)
+import Point2d
 import Quantity exposing (at, divideBy, minus, multiplyBy, per, plus)
 import TypedSvg exposing (circle, g, polyline, svg)
 import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, viewBox)
@@ -35,13 +37,32 @@ pixelsPerMeter =
     screenWidth |> per worldWidth
 
 
+type YUpCoordinates
+    = YUpCoordinates
+
+
+type Surface
+    = Surface (List (Point2d.Point2d Length.Meters YUpCoordinates))
+
+
 type alias Model =
-    { count : Int }
+    { count : Int
+    , surface : Surface
+    }
 
 
 initialModel : Model
 initialModel =
-    { count = 0 }
+    { count = 0
+    , surface =
+        Surface
+            [ Point2d.meters -100 0
+            , Point2d.meters -50 10
+            , Point2d.meters 0 0
+            , Point2d.meters 10 10
+            , Point2d.meters 200 0
+            ]
+    }
 
 
 update msg model =
@@ -62,7 +83,8 @@ view model =
             , topRight
             , bottomRight
             , bottomLeft
-            , ship (meters 0) (meters 10)
+            , ship (Point2d.meters 0 10)
+            , mountain model.surface
             ]
         ]
 
@@ -75,8 +97,11 @@ main =
         }
 
 
-ship wx wy =
+ship pos =
     let
+        ( wx, wy ) =
+            Point2d.coordinates pos
+
         bottom2anchor =
             meters 2
 
@@ -87,13 +112,13 @@ ship wx wy =
             meters 5
 
         ( x0, y0 ) =
-            worldToScreen wx (wy |> plus top2anchor)
+            worldToScreen (Point2d.xy wx (wy |> plus top2anchor))
 
         ( x1, y1 ) =
-            worldToScreen (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor)
+            worldToScreen (Point2d.xy (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor))
 
         ( x2, y2 ) =
-            worldToScreen (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor)
+            worldToScreen (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
     in
     g []
         [ polyline
@@ -102,14 +127,28 @@ ship wx wy =
             , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
             ]
             []
-        , dot wx wy
+        , dot pos
         ]
 
 
-dot wx wy =
+mountain (Surface worldCoords) =
+    let
+        screenCoords : List ( Float, Float )
+        screenCoords =
+            List.map worldToScreen worldCoords
+    in
+    polyline
+        [ noFill
+        , stroke <| Paint mountainColor
+        , points screenCoords
+        ]
+        []
+
+
+dot pos =
     let
         ( x, y ) =
-            worldToScreen wx wy
+            worldToScreen pos
     in
     circle
         [ cx (px x)
@@ -120,7 +159,12 @@ dot wx wy =
         []
 
 
-worldToScreen wx wy =
+worldToScreen : Point2d.Point2d Length.Meters YUpCoordinates -> ( Float, Float )
+worldToScreen point =
+    let
+        ( wx, wy ) =
+            Point2d.coordinates point
+    in
     ( wx |> plus (worldWidth |> divideBy 2) |> at pixelsPerMeter |> inPixels
     , worldHeight |> minus wy |> at pixelsPerMeter |> inPixels
     )
@@ -143,16 +187,16 @@ bottom =
 
 
 topLeft =
-    dot left top
+    dot <| Point2d.xy left top
 
 
 topRight =
-    dot right top
+    dot <| Point2d.xy right top
 
 
 bottomRight =
-    dot right bottom
+    dot <| Point2d.xy right bottom
 
 
 bottomLeft =
-    dot left bottom
+    dot <| Point2d.xy left bottom
