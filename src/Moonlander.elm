@@ -44,18 +44,8 @@ initialModel =
     { count = 0 }
 
 
-type Msg
-    = Increment
-    | Decrement
-
-
 update msg model =
-    case msg of
-        Increment ->
-            { model | count = model.count + 1 }
-
-        Decrement ->
-            { model | count = model.count - 1 }
+    model
 
 
 view model =
