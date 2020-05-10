@@ -48,6 +48,7 @@ type Surface
 
 type alias Model =
     { surface : Surface
+    , shipPos : Point2d.Point2d Length.Meters YUpCoordinates
     }
 
 
@@ -61,6 +62,7 @@ initialModel =
             , Point2d.meters 10 10
             , Point2d.meters 200 0
             ]
+    , shipPos = Point2d.meters 0 10
     }
 
 
@@ -97,7 +99,7 @@ view model =
              , topRight
              , bottomRight
              , bottomLeft
-             , ship (Point2d.meters 0 10)
+             , ship model.shipPos
              , mountain model.surface
              , line line1
              , line line2
