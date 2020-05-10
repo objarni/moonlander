@@ -1,5 +1,6 @@
 module Moonlander exposing (main)
 
+import Angle
 import Browser
 import Color
 import Html exposing (Html, button, div, text)
@@ -53,7 +54,9 @@ type alias Model =
 
 
 type alias ShipState =
-    { shipPos : Point2d.Point2d Length.Meters YUpCoordinates }
+    { centerOfGravity : Point2d.Point2d Length.Meters YUpCoordinates
+    , rotation : Angle.Angle
+    }
 
 
 initialModel : Model
@@ -66,7 +69,10 @@ initialModel =
             , Point2d.meters 10 10
             , Point2d.meters 200 0
             ]
-    , shipState = { shipPos = Point2d.meters 0 10 }
+    , shipState =
+        { centerOfGravity = Point2d.meters 0 10
+        , rotation = Angle.degrees 10
+        }
     }
 
 
@@ -103,7 +109,7 @@ view model =
              , topRight
              , bottomRight
              , bottomLeft
-             , ship model.shipState.shipPos
+             , viewShip model.shipState
              , mountain model.surface
              , line line1
              , line line2
@@ -132,10 +138,10 @@ line l =
     mountain s
 
 
-ship pos =
+viewShip ship =
     let
         ( wx, wy ) =
-            Point2d.coordinates pos
+            Point2d.coordinates ship.centerOfGravity
 
         bottom2anchor =
             meters 2
@@ -146,14 +152,17 @@ ship pos =
         shipHalfWidth =
             meters 5
 
+        rotate pt =
+            Point2d.rotateAround ship.centerOfGravity ship.rotation pt
+
         ( x0, y0 ) =
-            worldToScreen (Point2d.xy wx (wy |> plus top2anchor))
+            worldToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
 
         ( x1, y1 ) =
-            worldToScreen (Point2d.xy (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor))
+            worldToScreen <| rotate (Point2d.xy (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor))
 
         ( x2, y2 ) =
-            worldToScreen (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
+            worldToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
     in
     g []
         [ polyline
@@ -162,7 +171,7 @@ ship pos =
             , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
             ]
             []
-        , dot pos
+        , dot ship.centerOfGravity
         ]
 
 
