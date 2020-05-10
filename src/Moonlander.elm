@@ -6,6 +6,7 @@ import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
 import Length exposing (inMeters, meters)
+import LineSegment2d
 import List
 import Palette exposing (..)
 import Pixels exposing (inPixels, pixels)
@@ -70,6 +71,21 @@ update msg model =
 
 
 view model =
+    let
+        line1 =
+            LineSegment2d.from (Point2d.meters 0 20) (Point2d.meters 10 100)
+
+        line2 =
+            LineSegment2d.from (Point2d.meters -50 20) (Point2d.meters 100 100)
+
+        maybeCollPoint =
+            case LineSegment2d.intersectionPoint line1 line2 of
+                Just point ->
+                    [ dot point ]
+
+                Nothing ->
+                    []
+    in
     div
         [ style "background-color"
             (Color.toCssString spaceColor)
@@ -79,13 +95,17 @@ view model =
         , style "border-width" "5"
         ]
         [ svg [ viewBox 0 0 (inPixels screenWidth) (inPixels screenHeight) ]
-            [ topLeft
-            , topRight
-            , bottomRight
-            , bottomLeft
-            , ship (Point2d.meters 0 10)
-            , mountain model.surface
-            ]
+            ([ topLeft
+             , topRight
+             , bottomRight
+             , bottomLeft
+             , ship (Point2d.meters 0 10)
+             , mountain model.surface
+             , line line1
+             , line line2
+             ]
+                ++ maybeCollPoint
+            )
         ]
 
 
@@ -95,6 +115,17 @@ main =
         , view = view
         , update = update
         }
+
+
+line l =
+    let
+        ( p1, p2 ) =
+            LineSegment2d.endpoints l
+
+        s =
+            Surface [ p1, p2 ]
+    in
+    mountain s
 
 
 ship pos =
