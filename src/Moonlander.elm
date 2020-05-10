@@ -47,15 +47,13 @@ type Surface
 
 
 type alias Model =
-    { count : Int
-    , surface : Surface
+    { surface : Surface
     }
 
 
 initialModel : Model
 initialModel =
-    { count = 0
-    , surface =
+    { surface =
         Surface
             [ Point2d.meters -100 0
             , Point2d.meters -50 10
