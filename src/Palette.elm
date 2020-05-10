@@ -1,4 +1,4 @@
-module Palette exposing (shipColor, spaceColor)
+module Palette exposing (..)
 
 import Color
 
@@ -9,3 +9,7 @@ shipColor =
 
 spaceColor =
     Color.darkCharcoal
+
+
+mountainColor =
+    Color.lightGray
