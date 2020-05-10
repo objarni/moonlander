@@ -56,6 +56,8 @@ type alias Model =
 type alias ShipState =
     { centerOfGravity : Point2d.Point2d Length.Meters YUpCoordinates
     , rotation : Angle.Angle
+    , leftBooster : Bool
+    , rightBooster : Bool
     }
 
 
@@ -72,6 +74,8 @@ initialModel =
     , shipState =
         { centerOfGravity = Point2d.meters 0 10
         , rotation = Angle.degrees 10
+        , leftBooster = True
+        , rightBooster = False
         }
     }
 
@@ -163,16 +167,29 @@ viewShip ship =
 
         ( x2, y2 ) =
             worldToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
+
+        viewBooster b pos =
+            if b then
+                [ dot pos ]
+
+            else
+                []
+
+        boosters =
+            viewBooster ship.leftBooster (Point2d.meters -2 1)
+                ++ viewBooster ship.rightBooster (Point2d.meters 2 1)
     in
     g []
-        [ polyline
+        ([ polyline
             [ noFill
             , stroke <| Paint shipColor
             , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
             ]
             []
-        , dot ship.centerOfGravity
-        ]
+         , dot ship.centerOfGravity
+         ]
+            ++ boosters
+        )
 
 
 mountain (Surface worldCoords) =
