@@ -48,8 +48,12 @@ type Surface
 
 type alias Model =
     { surface : Surface
-    , shipPos : Point2d.Point2d Length.Meters YUpCoordinates
+    , shipState : ShipState
     }
+
+
+type alias ShipState =
+    { shipPos : Point2d.Point2d Length.Meters YUpCoordinates }
 
 
 initialModel : Model
@@ -62,7 +66,7 @@ initialModel =
             , Point2d.meters 10 10
             , Point2d.meters 200 0
             ]
-    , shipPos = Point2d.meters 0 10
+    , shipState = { shipPos = Point2d.meters 0 10 }
     }
 
 
@@ -99,7 +103,7 @@ view model =
              , topRight
              , bottomRight
              , bottomLeft
-             , ship model.shipPos
+             , ship model.shipState.shipPos
              , mountain model.surface
              , line line1
              , line line2
