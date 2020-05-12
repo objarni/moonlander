@@ -13,10 +13,11 @@ import Palette exposing (..)
 import Pixels exposing (inPixels, pixels)
 import Point2d
 import Quantity exposing (at, divideBy, minus, multiplyBy, per, plus)
-import TypedSvg exposing (circle, g, polyline, svg)
-import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, viewBox)
+import TypedSvg exposing (circle, g, polygon, polyline, svg)
+import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, transform, viewBox)
 import TypedSvg.Core exposing (Svg)
-import TypedSvg.Types exposing (Paint(..), px)
+import TypedSvg.Types exposing (Paint(..), Transform(..), px)
+import Vector2d
 
 
 screenWidth =
@@ -40,7 +41,7 @@ pixelsPerMeter =
 
 
 type YUpCoordinates
-    = YUpCoordinates
+    = YUpCoordinates Never
 
 
 type Surface
@@ -73,7 +74,7 @@ initialModel =
             ]
     , shipState =
         { centerOfGravity = Point2d.meters 0 10
-        , rotation = Angle.degrees 10
+        , rotation = Angle.degrees -15
         , leftBooster = True
         , rightBooster = False
         }
@@ -84,10 +85,14 @@ update msg model =
     model
 
 
+
+-- @remind fix zoom problem
+
+
 view model =
     let
         line1 =
-            LineSegment2d.from (Point2d.meters 0 20) (Point2d.meters 10 100)
+            LineSegment2d.from (Point2d.meters -40 -20) (Point2d.meters 10 100)
 
         line2 =
             LineSegment2d.from (Point2d.meters -50 20) (Point2d.meters 100 100)
@@ -114,6 +119,7 @@ view model =
              , bottomRight
              , bottomLeft
              , viewShip model.shipState
+             , viewStar (Point2d.meters 0 50)
              , mountain model.surface
              , line line1
              , line line2
@@ -170,7 +176,7 @@ viewShip ship =
 
         viewBooster b pos =
             if b then
-                [ dot pos ]
+                []
 
             else
                 []
@@ -206,6 +212,60 @@ mountain (Surface worldCoords) =
         []
 
 
+
+-- @remind rename view functions to viewX
+
+
+viewStar : Point2d.Point2d Length.Meters YUpCoordinates -> Svg msg
+viewStar pos =
+    let
+        ( px1, py1 ) =
+            worldToScreen pos
+
+        ( ox, oy ) =
+            worldToScreen Point2d.origin
+
+        ( px, py ) =
+            ( px1 - ox, py1 - oy )
+
+        translateAmount =
+            Vector2d.from Point2d.origin pos
+
+        translate =
+            Point2d.translateBy translateAmount
+
+        screenCoords : List ( Float, Float )
+        screenCoords =
+            List.map worldToScreen
+                [ Point2d.meters 0 2.5
+                , Point2d.meters 2.5 -2.5
+                , Point2d.meters -2.5 -2.5
+                ]
+
+        upSideDown =
+            transform [ Translate px py, Rotate 180 ox oy ]
+
+        position =
+            transform [ Translate px py ]
+    in
+    g []
+        [ polygon
+            [ noFill
+            , stroke <| Paint starColor
+            , points screenCoords
+            , position
+            ]
+            []
+        , polygon
+            [ noFill
+            , stroke <| Paint starColor
+            , points screenCoords
+            , upSideDown
+            ]
+            []
+        ]
+
+
 dot pos =
     let
         ( x, y ) =
@@ -215,7 +275,7 @@ dot pos =
         [ cx (px x)
         , cy (px y)
         , r (px 5)
-        , fill <| Paint shipColor
+        , fill <| Paint starColor
         ]
         []
 
