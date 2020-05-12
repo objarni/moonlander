@@ -162,8 +162,8 @@ viewShip ship =
         shipHalfWidth =
             meters 5
 
-        rotate pt =
-            Point2d.rotateAround ship.centerOfGravity ship.rotation pt
+        rotation =
+            ship.rotation
 
         ( x0, y0 ) =
             worldToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
@@ -174,28 +174,24 @@ viewShip ship =
         ( x2, y2 ) =
             worldToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
 
-        viewBooster b pos =
-            if b then
-                []
+        rotate pt =
+            Point2d.rotateAround ship.centerOfGravity rotation pt
 
-            else
-                []
+        coords =
+            [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
 
-        boosters =
-            viewBooster ship.leftBooster (Point2d.meters -2 1)
-                ++ viewBooster ship.rightBooster (Point2d.meters 2 1)
+        color =
+            shipColor
     in
     g []
-        ([ polyline
+        [ polygon
             [ noFill
-            , stroke <| Paint shipColor
-            , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
+            , stroke <| Paint color
+            , points coords
             ]
             []
-         , dot ship.centerOfGravity
-         ]
-            ++ boosters
-        )
+        , dot ship.centerOfGravity
+        ]
 
 
 mountain (Surface worldCoords) =
