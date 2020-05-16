@@ -2,7 +2,7 @@ module Moonlander exposing (main)
 
 import Angle
 import Browser
-import Color
+import Color exposing (Color)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -13,10 +13,11 @@ import Palette exposing (..)
 import Pixels exposing (inPixels, pixels)
 import Point2d
 import Quantity exposing (at, divideBy, minus, multiplyBy, per, plus)
-import TypedSvg exposing (circle, g, polyline, svg)
+import TypedSvg exposing (circle, g, polygon, polyline, svg)
 import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, viewBox)
 import TypedSvg.Core exposing (Svg)
 import TypedSvg.Types exposing (Paint(..), px)
+import Vector2d
 
 
 screenWidth =
@@ -44,7 +45,7 @@ type YUpCoordinates
 
 
 type Surface
-    = Surface (List (Point2d.Point2d Length.Meters YUpCoordinates))
+    = Surface (List Pt)
 
 
 type alias Model =
@@ -54,7 +55,7 @@ type alias Model =
 
 
 type alias ShipState =
-    { centerOfGravity : Point2d.Point2d Length.Meters YUpCoordinates
+    { centre : Offset
     , rotation : Angle.Angle
     , leftBooster : Bool
     , rightBooster : Bool
@@ -72,7 +73,7 @@ initialModel =
             , Point2d.meters 200 0
             ]
     , shipState =
-        { centerOfGravity = Point2d.meters 0 10
+        { centre = position 0 10
         , rotation = Angle.degrees 10
         , leftBooster = True
         , rightBooster = False
@@ -99,6 +100,9 @@ view model =
 
                 Nothing ->
                     []
+
+        ship =
+            model.shipState
     in
     div
         [ style "background-color"
@@ -117,6 +121,7 @@ view model =
              , mountain model.surface
              , line line1
              , line line2
+             , viewFigure shipFigure ship.centre ship.rotation
              ]
                 ++ maybeCollPoint
             )
@@ -142,10 +147,28 @@ line l =
     mountain s
 
 
+viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
+viewFigure (Figure anchor pts color) offset rot =
+    let
+        transformPt pt =
+            worldToScreen <| Point2d.rotateAround anchor rot pt
+
+        screenCoords : List ( Float, Float )
+        screenCoords =
+            List.map transformPt pts
+    in
+    polygon
+        [ noFill
+        , stroke <| Paint color
+        , points screenCoords
+        ]
+        []
+
+
 viewShip ship =
     let
         ( wx, wy ) =
-            Point2d.coordinates ship.centerOfGravity
+            Point2d.coordinates ship.centre
 
         bottom2anchor =
             meters 2
@@ -157,7 +180,7 @@ viewShip ship =
             meters 5
 
         rotate pt =
-            Point2d.rotateAround ship.centerOfGravity ship.rotation pt
+            Point2d.rotateAround ship.centre ship.rotation pt
 
         ( x0, y0 ) =
             worldToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
@@ -186,7 +209,7 @@ viewShip ship =
             , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
             ]
             []
-         , dot ship.centerOfGravity
+         , dot ship.centre
          ]
             ++ boosters
         )
@@ -220,7 +243,7 @@ dot pos =
         []
 
 
-worldToScreen : Point2d.Point2d Length.Meters YUpCoordinates -> ( Float, Float )
+worldToScreen : Pt -> ( Float, Float )
 worldToScreen point =
     let
         ( wx, wy ) =
@@ -261,3 +284,43 @@ bottomRight =
 
 bottomLeft =
     dot <| Point2d.xy left bottom
+
+
+
+-- Polygon Figures
+
+
+position x y =
+    Vector2d.meters x y
+
+
+type alias Offset =
+    Vector2d.Vector2d Length.Meters YUpCoordinates
+
+
+type alias Pt =
+    Point2d.Point2d Length.Meters YUpCoordinates
+
+
+type Figure
+    = Figure Pt (List Pt) Color
+
+
+shipFigure =
+    let
+        p1 =
+            Point2d.meters 0 10
+
+        p2 =
+            Point2d.meters 5 0
+
+        p3 =
+            Point2d.meters -5 0
+
+        points =
+            [ p1, p2, p3 ]
+
+        anchor =
+            Point2d.meters 0 2
+    in
+    Figure anchor points shipColor
