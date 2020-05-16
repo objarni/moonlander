@@ -14,9 +14,9 @@ import Pixels exposing (inPixels, pixels)
 import Point2d
 import Quantity exposing (at, divideBy, minus, multiplyBy, per, plus)
 import TypedSvg exposing (circle, g, polygon, polyline, svg)
-import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, viewBox)
+import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, strokeWidth, transform, viewBox)
 import TypedSvg.Core exposing (Svg)
-import TypedSvg.Types exposing (Paint(..), px)
+import TypedSvg.Types exposing (Paint(..), Transform(..), px)
 import Vector2d
 
 
@@ -41,7 +41,7 @@ pixelsPerMeter =
 
 
 type YUpCoordinates
-    = YUpCoordinates
+    = YUpCoordinates Never
 
 
 type Surface
@@ -85,10 +85,14 @@ update msg model =
     model
 
 
+
+-- @remind fix zoom problem
+
+
 view model =
     let
         line1 =
-            LineSegment2d.from (Point2d.meters 0 20) (Point2d.meters 10 100)
+            LineSegment2d.from (Point2d.meters -40 -20) (Point2d.meters 10 100)
 
         line2 =
             LineSegment2d.from (Point2d.meters -50 20) (Point2d.meters 100 100)
@@ -118,6 +122,7 @@ view model =
              , bottomRight
              , bottomLeft
              , viewShip model.shipState
+             , viewStar (Point2d.meters 0 50)
              , mountain model.surface
              , line line1
              , line line2
@@ -182,6 +187,9 @@ viewShip ship =
         rotate pt =
             Point2d.rotateAround ship.centre ship.rotation pt
 
+        rotation =
+            ship.rotation
+
         ( x0, y0 ) =
             worldToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
 
@@ -191,28 +199,24 @@ viewShip ship =
         ( x2, y2 ) =
             worldToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
 
-        viewBooster b pos =
-            if b then
-                [ dot pos ]
+        rotate pt =
+            Point2d.rotateAround ship.centerOfGravity rotation pt
 
-            else
-                []
+        coords =
+            [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
 
-        boosters =
-            viewBooster ship.leftBooster (Point2d.meters -2 1)
-                ++ viewBooster ship.rightBooster (Point2d.meters 2 1)
+        color =
+            shipColor
     in
     g []
-        ([ polyline
+        [ polygon
             [ noFill
-            , stroke <| Paint shipColor
-            , points [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ), ( x0, y0 ) ]
+            , stroke <| Paint color
+            , points coords
             ]
             []
-         , dot ship.centre
-         ]
-            ++ boosters
-        )
+        , dot ship.centre
+        ]
 
 
 mountain (Surface worldCoords) =
@@ -229,6 +233,60 @@ mountain (Surface worldCoords) =
         []
 
 
+
+-- @remind rename view functions to viewX
+
+
+viewStar : Point2d.Point2d Length.Meters YUpCoordinates -> Svg msg
+viewStar pos =
+    let
+        ( px1, py1 ) =
+            worldToScreen pos
+
+        ( ox, oy ) =
+            worldToScreen Point2d.origin
+
+        ( px, py ) =
+            ( px1 - ox, py1 - oy )
+
+        translateAmount =
+            Vector2d.from Point2d.origin pos
+
+        translate =
+            Point2d.translateBy translateAmount
+
+        screenCoords : List ( Float, Float )
+        screenCoords =
+            List.map worldToScreen
+                [ Point2d.meters 0 2.5
+                , Point2d.meters 2.5 -2.5
+                , Point2d.meters -2.5 -2.5
+                ]
+
+        upSideDown =
+            transform [ Translate px py, Rotate 180 ox oy ]
+
+        position =
+            transform [ Translate px py ]
+    in
+    g []
+        [ polygon
+            [ noFill
+            , stroke <| Paint starColor
+            , points screenCoords
+            , position
+            ]
+            []
+        , polygon
+            [ noFill
+            , stroke <| Paint starColor
+            , points screenCoords
+            , upSideDown
+            ]
+            []
+        ]
+
+
 dot pos =
     let
         ( x, y ) =
@@ -238,7 +296,7 @@ dot pos =
         [ cx (px x)
         , cy (px y)
         , r (px 5)
-        , fill <| Paint shipColor
+        , fill <| Paint starColor
         ]
         []
 

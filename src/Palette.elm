@@ -13,3 +13,7 @@ spaceColor =
 
 mountainColor =
     Color.lightGray
+
+
+starColor =
+    Color.lightYellow
