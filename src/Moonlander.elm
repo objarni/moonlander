@@ -117,14 +117,14 @@ view model =
         , style "border-width" "5"
         ]
         [ svg [ viewBox 0 0 (inPixels screenWidth) (inPixels screenHeight) ]
-            ([ topLeft
-             , topRight
-             , bottomRight
-             , bottomLeft
+            ([ viewTopLeft
+             , viewTopRight
+             , viewBottomRight
+             , viewBottomLeft
              , viewStar (Point2d.meters 0 50)
              , viewSurface model.surface
-             , line line1
-             , line line2
+             , viewLine line1
+             , viewLine line2
              , viewFigure shipFigure ship.centre ship.rotation
              ]
                 ++ maybeCollPoint
@@ -140,10 +140,10 @@ main =
         }
 
 
-line l =
+viewLine line =
     let
         ( p1, p2 ) =
-            LineSegment2d.endpoints l
+            LineSegment2d.endpoints line
 
         s =
             Surface [ p1, p2 ]
@@ -303,19 +303,19 @@ bottom =
     meters 0
 
 
-topLeft =
+viewTopLeft =
     viewPoint <| Point2d.xy left top
 
 
-topRight =
+viewTopRight =
     viewPoint <| Point2d.xy right top
 
 
-bottomRight =
+viewBottomRight =
     viewPoint <| Point2d.xy right bottom
 
 
-bottomLeft =
+viewBottomLeft =
     viewPoint <| Point2d.xy left bottom
 
 
