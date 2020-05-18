@@ -100,7 +100,7 @@ view model =
         maybeCollPoint =
             case LineSegment2d.intersectionPoint line1 line2 of
                 Just point ->
-                    [ dot point ]
+                    [ viewPoint point ]
 
                 Nothing ->
                     []
@@ -121,10 +121,8 @@ view model =
              , topRight
              , bottomRight
              , bottomLeft
-
-             --, viewShip model.shipState
              , viewStar (Point2d.meters 0 50)
-             , mountain model.surface
+             , viewSurface model.surface
              , line line1
              , line line2
              , viewFigure shipFigure ship.centre ship.rotation
@@ -150,7 +148,7 @@ line l =
         s =
             Surface [ p1, p2 ]
     in
-    mountain s
+    viewSurface s
 
 
 viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
@@ -173,44 +171,7 @@ viewFigure (Figure anchor pts color) offset rot =
         []
 
 
-
---viewShip ship =
---    let
---        ( wx, wy ) =
---            Vector2d.components ship.centre
---        bottom2anchor =
---            meters 2
---        top2anchor =
---            meters 8
---        shipHalfWidth =
---            meters 5
---        rotate pt =
---            Vector2d.rotateAround ship.centre ship.rotation pt
---        rotation =
---            ship.rotation
---        ( x0, y0 ) =
---            pointToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
---        ( x1, y1 ) =
---            pointToScreen <| rotate (Point2d.xy (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor))
---        ( x2, y2 ) =
---            pointToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
---        coords =
---            [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
---        color =
---            shipColor
---    in
---    g []
---        [ polygon
---            [ noFill
---            , stroke <| Paint color
---            , points coords
---            ]
---            []
---        , viewOffset ship.centre
---        ]
-
-
-mountain (Surface worldCoords) =
+viewSurface (Surface worldCoords) =
     let
         screenCoords : List ( Float, Float )
         screenCoords =
@@ -222,10 +183,6 @@ mountain (Surface worldCoords) =
         , points screenCoords
         ]
         []
-
-
-
--- @remind rename view functions to viewX
 
 
 viewStar : Point2d.Point2d Length.Meters YUpCoordinates -> Svg msg
@@ -278,8 +235,8 @@ viewStar pos =
         ]
 
 
-dot : Pt -> Svg msg
-dot pos =
+viewPoint : Pt -> Svg msg
+viewPoint pos =
     let
         ( x, y ) =
             pointToScreen pos
@@ -347,19 +304,19 @@ bottom =
 
 
 topLeft =
-    dot <| Point2d.xy left top
+    viewPoint <| Point2d.xy left top
 
 
 topRight =
-    dot <| Point2d.xy right top
+    viewPoint <| Point2d.xy right top
 
 
 bottomRight =
-    dot <| Point2d.xy right bottom
+    viewPoint <| Point2d.xy right bottom
 
 
 bottomLeft =
-    dot <| Point2d.xy left bottom
+    viewPoint <| Point2d.xy left bottom
 
 
 
