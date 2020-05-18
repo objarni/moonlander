@@ -199,9 +199,6 @@ viewShip ship =
         ( x2, y2 ) =
             worldToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
 
-        rotate pt =
-            Point2d.rotateAround ship.centerOfGravity rotation pt
-
         coords =
             [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
 
@@ -266,7 +263,7 @@ viewStar pos =
         upSideDown =
             transform [ Translate px py, Rotate 180 ox oy ]
 
-        position =
+        position1 =
             transform [ Translate px py ]
     in
     g []
@@ -274,7 +271,7 @@ viewStar pos =
             [ noFill
             , stroke <| Paint starColor
             , points screenCoords
-            , position
+            , position1
             ]
             []
         , polygon
