@@ -73,8 +73,8 @@ initialModel =
             , Point2d.meters 200 0
             ]
     , shipState =
-        { centre = position 0 10
-        , rotation = Angle.degrees 10
+        { centre = position 0 0
+        , rotation = Angle.degrees 0
         , leftBooster = True
         , rightBooster = False
         }
@@ -157,7 +157,9 @@ viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
 viewFigure (Figure anchor pts color) offset rot =
     let
         transformPt pt =
-            pointToScreen <| Point2d.rotateAround anchor rot pt
+            Point2d.rotateAround anchor rot pt
+                |> Point2d.translateBy offset
+                |> pointToScreen
 
         screenCoords : List ( Float, Float )
         screenCoords =
