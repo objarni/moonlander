@@ -73,7 +73,7 @@ initialModel =
             , Point2d.meters 200 0
             ]
     , shipState =
-        { centre = position 0 0
+        { centre = Vector2d.meters 0 0
         , rotation = Angle.degrees 0
         , leftBooster = True
         , rightBooster = False
@@ -321,11 +321,6 @@ bottomLeft =
 
 
 -- Polygon Figures
-
-
-position : Float -> Float -> Offset
-position x y =
-    Vector2d.meters x y
 
 
 type alias Offset =
