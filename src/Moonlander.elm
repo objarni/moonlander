@@ -121,7 +121,8 @@ view model =
              , topRight
              , bottomRight
              , bottomLeft
-             , viewShip model.shipState
+
+             --, viewShip model.shipState
              , viewStar (Point2d.meters 0 50)
              , mountain model.surface
              , line line1
@@ -156,7 +157,7 @@ viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
 viewFigure (Figure anchor pts color) offset rot =
     let
         transformPt pt =
-            worldToScreen <| Point2d.rotateAround anchor rot pt
+            pointToScreen <| Point2d.rotateAround anchor rot pt
 
         screenCoords : List ( Float, Float )
         screenCoords =
@@ -170,57 +171,48 @@ viewFigure (Figure anchor pts color) offset rot =
         []
 
 
-viewShip ship =
-    let
-        ( wx, wy ) =
-            Point2d.coordinates ship.centre
 
-        bottom2anchor =
-            meters 2
-
-        top2anchor =
-            meters 8
-
-        shipHalfWidth =
-            meters 5
-
-        rotate pt =
-            Point2d.rotateAround ship.centre ship.rotation pt
-
-        rotation =
-            ship.rotation
-
-        ( x0, y0 ) =
-            worldToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
-
-        ( x1, y1 ) =
-            worldToScreen <| rotate (Point2d.xy (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor))
-
-        ( x2, y2 ) =
-            worldToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
-
-        coords =
-            [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
-
-        color =
-            shipColor
-    in
-    g []
-        [ polygon
-            [ noFill
-            , stroke <| Paint color
-            , points coords
-            ]
-            []
-        , dot ship.centre
-        ]
+--viewShip ship =
+--    let
+--        ( wx, wy ) =
+--            Vector2d.components ship.centre
+--        bottom2anchor =
+--            meters 2
+--        top2anchor =
+--            meters 8
+--        shipHalfWidth =
+--            meters 5
+--        rotate pt =
+--            Vector2d.rotateAround ship.centre ship.rotation pt
+--        rotation =
+--            ship.rotation
+--        ( x0, y0 ) =
+--            pointToScreen <| rotate (Point2d.xy wx (wy |> plus top2anchor))
+--        ( x1, y1 ) =
+--            pointToScreen <| rotate (Point2d.xy (wx |> plus shipHalfWidth) (wy |> minus bottom2anchor))
+--        ( x2, y2 ) =
+--            pointToScreen <| rotate (Point2d.xy (wx |> minus shipHalfWidth) (wy |> minus bottom2anchor))
+--        coords =
+--            [ ( x0, y0 ), ( x1, y1 ), ( x2, y2 ) ]
+--        color =
+--            shipColor
+--    in
+--    g []
+--        [ polygon
+--            [ noFill
+--            , stroke <| Paint color
+--            , points coords
+--            ]
+--            []
+--        , viewOffset ship.centre
+--        ]
 
 
 mountain (Surface worldCoords) =
     let
         screenCoords : List ( Float, Float )
         screenCoords =
-            List.map worldToScreen worldCoords
+            List.map pointToScreen worldCoords
     in
     polyline
         [ noFill
@@ -238,10 +230,10 @@ viewStar : Point2d.Point2d Length.Meters YUpCoordinates -> Svg msg
 viewStar pos =
     let
         ( px1, py1 ) =
-            worldToScreen pos
+            pointToScreen pos
 
         ( ox, oy ) =
-            worldToScreen Point2d.origin
+            pointToScreen Point2d.origin
 
         ( px, py ) =
             ( px1 - ox, py1 - oy )
@@ -254,7 +246,7 @@ viewStar pos =
 
         screenCoords : List ( Float, Float )
         screenCoords =
-            List.map worldToScreen
+            List.map pointToScreen
                 [ Point2d.meters 0 2.5
                 , Point2d.meters 2.5 -2.5
                 , Point2d.meters -2.5 -2.5
@@ -284,10 +276,11 @@ viewStar pos =
         ]
 
 
+dot : Pt -> Svg msg
 dot pos =
     let
         ( x, y ) =
-            worldToScreen pos
+            pointToScreen pos
     in
     circle
         [ cx (px x)
@@ -298,11 +291,37 @@ dot pos =
         []
 
 
-worldToScreen : Pt -> ( Float, Float )
-worldToScreen point =
+viewOffset : Offset -> Svg msg
+viewOffset offset =
+    let
+        ( x, y ) =
+            offsetToScreen offset
+    in
+    circle
+        [ cx (px x)
+        , cy (px y)
+        , r (px 5)
+        , fill <| Paint starColor
+        ]
+        []
+
+
+pointToScreen : Pt -> ( Float, Float )
+pointToScreen point =
     let
         ( wx, wy ) =
             Point2d.coordinates point
+    in
+    ( wx |> plus (worldWidth |> divideBy 2) |> at pixelsPerMeter |> inPixels
+    , worldHeight |> minus wy |> at pixelsPerMeter |> inPixels
+    )
+
+
+offsetToScreen : Offset -> ( Float, Float )
+offsetToScreen offset =
+    let
+        ( wx, wy ) =
+            Vector2d.components offset
     in
     ( wx |> plus (worldWidth |> divideBy 2) |> at pixelsPerMeter |> inPixels
     , worldHeight |> minus wy |> at pixelsPerMeter |> inPixels
@@ -345,6 +364,7 @@ bottomLeft =
 -- Polygon Figures
 
 
+position : Float -> Float -> Offset
 position x y =
     Vector2d.meters x y
 
@@ -361,6 +381,7 @@ type Figure
     = Figure Pt (List Pt) Color
 
 
+shipFigure : Figure
 shipFigure =
     let
         p1 =
