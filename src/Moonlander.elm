@@ -3,6 +3,8 @@ module Moonlander exposing (main)
 import Angle
 import Browser
 import Color exposing (Color)
+import Figure exposing (..)
+import Figures exposing (..)
 import Html exposing (Html, button, div, text)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -40,12 +42,12 @@ pixelsPerMeter =
     screenWidth |> per worldWidth
 
 
-type YUpCoordinates
-    = YUpCoordinates Never
+type alias Offset =
+    Vector2d.Vector2d Length.Meters YUpCoordinates
 
 
 type Surface
-    = Surface (List Pt)
+    = Surface (List Coord)
 
 
 type alias Model =
@@ -130,14 +132,6 @@ view model =
                 ++ maybeCollPoint
             )
         ]
-
-
-main =
-    Browser.sandbox
-        { init = initialModel
-        , view = view
-        , update = update
-        }
 
 
 viewLine line =
@@ -235,7 +229,7 @@ viewStar pos =
         ]
 
 
-viewPoint : Pt -> Svg msg
+viewPoint : Coord -> Svg msg
 viewPoint pos =
     let
         ( x, y ) =
@@ -265,7 +259,7 @@ viewOffset offset =
         []
 
 
-pointToScreen : Pt -> ( Float, Float )
+pointToScreen : Coord -> ( Float, Float )
 pointToScreen point =
     let
         ( wx, wy ) =
@@ -319,38 +313,9 @@ viewBottomLeft =
     viewPoint <| Point2d.xy left bottom
 
 
-
--- Polygon Figures
-
-
-type alias Offset =
-    Vector2d.Vector2d Length.Meters YUpCoordinates
-
-
-type alias Pt =
-    Point2d.Point2d Length.Meters YUpCoordinates
-
-
-type Figure
-    = Figure Pt (List Pt) Color
-
-
-shipFigure : Figure
-shipFigure =
-    let
-        p1 =
-            Point2d.meters 0 10
-
-        p2 =
-            Point2d.meters 5 0
-
-        p3 =
-            Point2d.meters -5 0
-
-        points =
-            [ p1, p2, p3 ]
-
-        anchor =
-            Point2d.meters 0 2
-    in
-    Figure anchor points shipColor
+main =
+    Browser.sandbox
+        { init = initialModel
+        , view = view
+        , update = update
+        }
