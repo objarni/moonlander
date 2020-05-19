@@ -66,10 +66,10 @@ view model =
              , viewBottomRight
              , viewBottomLeft
              , viewStar (Point2d.meters 0 50)
-             , viewSurface model.surface
+             , viewFigure model.moon ship.centre ship.rotation
+             , viewFigure shipFigure ship.centre ship.rotation
              , viewLine line1
              , viewLine line2
-             , viewFigure shipFigure ship.centre ship.rotation
              ]
                 ++ maybeCollPoint
             )
