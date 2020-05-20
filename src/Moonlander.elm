@@ -2,10 +2,10 @@ module Moonlander exposing (main)
 
 import Angle
 import Browser
-import Figure exposing (Figure(..))
+import Figure exposing (Figure(..), Offset)
 import Palette exposing (mountainColor)
 import Point2d
-import Render exposing (Offset, Surface(..), view)
+import Render exposing (view)
 import Vector2d
 
 

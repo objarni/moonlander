@@ -3,7 +3,7 @@ module Figures exposing (..)
 import Color exposing (Color)
 import Figure exposing (..)
 import Length exposing (inMeters, meters)
-import Palette exposing (shipColor)
+import Palette exposing (..)
 import Point2d
 import Vector2d
 
@@ -27,3 +27,21 @@ shipFigure =
             Point2d.meters 0 2
     in
     Figure anchor points shipColor
+
+
+triangleFigure : Figure
+triangleFigure =
+    let
+        p1 =
+            Point2d.meters 0 2
+
+        p2 =
+            Point2d.meters -1 0
+
+        p3 =
+            Point2d.meters 1 0
+
+        anchor =
+            Point2d.meters 1 1
+    in
+    Figure anchor [ p1, p2, p3 ] starColor

@@ -1,6 +1,4 @@
-module Render exposing (Offset, Surface(..), view)
-
---import Browser
+module Render exposing (view)
 
 import Angle
 import Color exposing (Color)
@@ -19,10 +17,6 @@ import TypedSvg.Attributes exposing (cx, cy, fill, noFill, points, r, stroke, st
 import TypedSvg.Core exposing (Svg)
 import TypedSvg.Types exposing (Paint(..), Transform(..), px)
 import Vector2d
-
-
-type alias Offset =
-    Vector2d.Vector2d Length.Meters YUpCoordinates
 
 
 
@@ -66,6 +60,7 @@ view model =
              , viewBottomRight
              , viewBottomLeft
              , viewStar (Point2d.meters 0 50)
+             , viewStarNew (Vector2d.meters -20 50)
              , viewFigure model.moon ship.centre ship.rotation
              , viewFigure shipFigure ship.centre ship.rotation
              , viewLine line1
@@ -88,16 +83,21 @@ viewLine line =
 
 
 viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
-viewFigure (Figure anchor pts color) offset rot =
+viewFigure fig offset rot =
     let
-        transformPt pt =
-            Point2d.rotateAround anchor rot pt
-                |> Point2d.translateBy offset
-                |> pointToScreen
+        transformedFigure =
+            transformFigure fig offset rot
 
+        (Figure anchor pts color) =
+            transformedFigure
+
+        --transformPt pt =
+        --    Point2d.rotateAround anchor rot pt
+        --        |> Point2d.translateBy offset
+        --        |> pointToScreen
         screenCoords : List ( Float, Float )
         screenCoords =
-            List.map transformPt pts
+            List.map pointToScreen pts
     in
     polygon
         [ noFill
@@ -105,6 +105,11 @@ viewFigure (Figure anchor pts color) offset rot =
         , points screenCoords
         ]
         []
+
+
+viewStarNew : Offset -> Svg msg
+viewStarNew offset =
+    viewFigure triangleFigure offset (Angle.degrees 0)
 
 
 viewStar : Point2d.Point2d Length.Meters YUpCoordinates -> Svg msg
