@@ -81,10 +81,10 @@ viewLine line =
         ( p1, p2 ) =
             LineSegment2d.endpoints line
 
-        s =
-            Surface [ p1, p2 ]
+        fig =
+            Figure (Point2d.meters 0 0) [ p1, p2 ] mountainColor
     in
-    viewSurface s
+    viewFigure fig (Vector2d.meters 0 0) (Angle.degrees 0)
 
 
 viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
@@ -102,20 +102,6 @@ viewFigure (Figure anchor pts color) offset rot =
     polygon
         [ noFill
         , stroke <| Paint color
-        , points screenCoords
-        ]
-        []
-
-
-viewSurface (Surface worldCoords) =
-    let
-        screenCoords : List ( Float, Float )
-        screenCoords =
-            List.map pointToScreen worldCoords
-    in
-    polyline
-        [ noFill
-        , stroke <| Paint mountainColor
         , points screenCoords
         ]
         []
