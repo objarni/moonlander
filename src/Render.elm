@@ -59,8 +59,7 @@ view model =
              , viewTopRight
              , viewBottomRight
              , viewBottomLeft
-             , viewStar (Point2d.meters 0 50)
-             , viewStarNew (Vector2d.meters -20 50)
+             , viewStar (Vector2d.meters -20 50)
              , viewFigure model.moon ship.centre ship.rotation
              , viewFigure shipFigure ship.centre ship.rotation
              , viewLine line1
@@ -82,19 +81,25 @@ viewLine line =
     viewFigure fig (Vector2d.meters 0 0) (Angle.degrees 0)
 
 
+viewStar : Offset -> Svg msg
+viewStar offset =
+    let
+        triangle1 =
+            viewFigure triangleFigure offset (Angle.degrees 0)
+
+        triangle2 =
+            viewFigure triangleFigure offset (Angle.degrees 180)
+    in
+    g []
+        [ triangle1, triangle2 ]
+
+
 viewFigure : Figure -> Offset -> Angle.Angle -> Svg msg
 viewFigure fig offset rot =
     let
-        transformedFigure =
+        (Figure anchor pts color) =
             transformFigure fig offset rot
 
-        (Figure anchor pts color) =
-            transformedFigure
-
-        --transformPt pt =
-        --    Point2d.rotateAround anchor rot pt
-        --        |> Point2d.translateBy offset
-        --        |> pointToScreen
         screenCoords : List ( Float, Float )
         screenCoords =
             List.map pointToScreen pts
@@ -105,61 +110,6 @@ viewFigure fig offset rot =
         , points screenCoords
         ]
         []
-
-
-viewStarNew : Offset -> Svg msg
-viewStarNew offset =
-    viewFigure triangleFigure offset (Angle.degrees 0)
-
-
-viewStar : Point2d.Point2d Length.Meters YUpCoordinates -> Svg msg
-viewStar pos =
-    let
-        ( px1, py1 ) =
-            pointToScreen pos
-
-        ( ox, oy ) =
-            pointToScreen Point2d.origin
-
-        ( px, py ) =
-            ( px1 - ox, py1 - oy )
-
-        translateAmount =
-            Vector2d.from Point2d.origin pos
-
-        translate =
-            Point2d.translateBy translateAmount
-
-        screenCoords : List ( Float, Float )
-        screenCoords =
-            List.map pointToScreen
-                [ Point2d.meters 0 2.5
-                , Point2d.meters 2.5 -2.5
-                , Point2d.meters -2.5 -2.5
-                ]
-
-        upSideDown =
-            transform [ Translate px py, Rotate 180 ox oy ]
-
-        position1 =
-            transform [ Translate px py ]
-    in
-    g []
-        [ polygon
-            [ noFill
-            , stroke <| Paint starColor
-            , points screenCoords
-            , position1
-            ]
-            []
-        , polygon
-            [ noFill
-            , stroke <| Paint starColor
-            , points screenCoords
-            , upSideDown
-            ]
-            []
-        ]
 
 
 viewPoint : Coord -> Svg msg

@@ -35,3 +35,8 @@ transformFigure (Figure anchor coords color) offset angle =
             List.map transformPt coords
     in
     Figure anchor newCoords color
+
+
+rotateFigure : Figure -> Angle.Angle -> Figure
+rotateFigure fig angle =
+    transformFigure fig (Vector2d.meters 0 0) angle
