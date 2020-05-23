@@ -23,10 +23,6 @@ import Vector2d
 -- @remind remove Surface in favor of Figure?
 
 
-type Surface
-    = Surface (List Coord)
-
-
 view model =
     let
         line1 =
@@ -60,6 +56,10 @@ view model =
              , viewBottomRight
              , viewBottomLeft
              , viewStar (Vector2d.meters -20 50)
+             , viewStar (Vector2d.meters -75 40)
+             , viewStar (Vector2d.meters -20 30)
+             , viewStar (Vector2d.meters -100 80)
+             , viewStar (Vector2d.meters 75 10)
              , viewFigure model.moon ship.centre ship.rotation
              , viewFigure shipFigure ship.centre ship.rotation
              , viewLine line1
