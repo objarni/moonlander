@@ -104,12 +104,16 @@ viewFigure fig offset rot =
         screenCoords =
             List.map pointToScreen pts
     in
-    polygon
-        [ noFill
-        , stroke <| Paint color
-        , points screenCoords
+    g []
+        [ polygon
+            [ noFill
+            , stroke <| Paint color
+            , points screenCoords
+            ]
+            []
+
+        --, viewOffset offset
         ]
-        []
 
 
 viewPoint : Coord -> Svg msg

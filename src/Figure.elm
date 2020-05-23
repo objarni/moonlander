@@ -27,7 +27,8 @@ transformFigure : Figure -> Offset -> Angle.Angle -> Figure
 transformFigure (Figure anchor coords color) offset angle =
     let
         transformPt pt =
-            Point2d.rotateAround anchor angle pt
+            pt
+                |> Point2d.rotateAround anchor angle
                 |> Point2d.translateBy offset
 
         newCoords : List Coord
