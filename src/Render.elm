@@ -60,7 +60,7 @@ view model =
              , viewStar (Vector2d.meters -20 30)
              , viewStar (Vector2d.meters -100 80)
              , viewStar (Vector2d.meters 75 10)
-             , viewFigure model.moon ship.centre ship.rotation
+             , viewFigure model.moon (Vector2d.meters 0 0) (Angle.degrees 0)
              , viewFigure shipFigure ship.centre ship.rotation
              , viewLine line1
              , viewLine line2

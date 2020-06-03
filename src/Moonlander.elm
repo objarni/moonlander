@@ -64,7 +64,11 @@ update msg model =
                     Vector2d.components oldShipState.centre
 
                 newY =
-                    Length.meters 1 |> Quantity.plus y
+                    if Quantity.lessThan (Length.meters 100) y then
+                        Length.meters 1 |> Quantity.plus y
+
+                    else
+                        Length.meters 0
 
                 newShipState =
                     { oldShipState
