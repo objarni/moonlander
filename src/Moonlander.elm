@@ -1,6 +1,7 @@
 module Moonlander exposing (main)
 
 import Angle
+import AngularSpeed exposing (AngularSpeed)
 import Browser
 import Browser.Events as Events
 import Duration
@@ -24,6 +25,7 @@ type alias ShipState =
     , rotation : Angle.Angle
     , leftBooster : Bool
     , rightBooster : Bool
+    , rotationSpeed : AngularSpeed
     }
 
 
@@ -47,6 +49,7 @@ initialModel flags =
             , rotation = Angle.degrees 0
             , leftBooster = True
             , rightBooster = False
+            , rotationSpeed = AngularSpeed.radiansPerSecond 0.9
             }
       }
     , Cmd.none
@@ -70,9 +73,15 @@ update msg model =
                     else
                         Length.meters 0
 
+                angleChange =
+                    oldShipState.rotationSpeed |> Quantity.for duration
+
                 newShipState =
                     { oldShipState
                         | centre = Vector2d.xy x newY
+                        , rotation =
+                            oldShipState.rotation
+                                |> Quantity.plus angleChange
                     }
             in
             ( { model | shipState = newShipState }, Cmd.none )

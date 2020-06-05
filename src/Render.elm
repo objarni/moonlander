@@ -19,10 +19,6 @@ import TypedSvg.Types exposing (Paint(..), Transform(..), px)
 import Vector2d
 
 
-
--- @remind remove Surface in favor of Figure?
-
-
 view model =
     let
         line1 =
@@ -111,8 +107,6 @@ viewFigure fig offset rot =
             , points screenCoords
             ]
             []
-
-        --, viewOffset offset
         ]
 
 
